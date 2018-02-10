@@ -6,7 +6,8 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class SenateBusProblem {
 
-    int simulation_speed = 100;               //increase this to fast forward the simulation.1 is normal speed.
+    int simulation_speed = 100;             //increase this to fast forward the simulation.
+                                            // 1 is normal speed.
 
     int riders_waiting = 0;                 //count of riders in the boarding area
     Semaphore mutex = new Semaphore(1);     //to protect waiting riders
