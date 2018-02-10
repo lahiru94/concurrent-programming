@@ -1,20 +1,17 @@
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.concurrent.ThreadLocalRandom;
 
 
 public class SenateBusProblem {
 
-    int simulation_speed = 100;             //increase this to fast forward the simulation.
-                                            // 1 is normal speed.
 
-    int riders_waiting = 0;                 //count of riders in the boarding area
-    Semaphore mutex = new Semaphore(1);     //to protect waiting riders
-    Semaphore bus = new Semaphore(0);       //to signal arrival of a bus
-    Semaphore boarded = new Semaphore(0);   // to signal a rider has been boarded
-
-    
+    private int simulation_speed = 100;             //increase this to fast forward the simulation.1 is normal speed.
+    private int riders_waiting = 0;                 //count of riders in the boarding area
+    private Semaphore mutex = new Semaphore(1);     //to protect waiting riders
+    private Semaphore bus = new Semaphore(0);       //to signal arrival of a bus
+    private Semaphore boarded = new Semaphore(0);   // to signal a rider has been boarded
 
     class Bus implements Runnable {
 
@@ -27,22 +24,26 @@ public class SenateBusProblem {
 
         @Override
         public void run() {
+            int riders_to_board = 0;
             try {
-                mutex.acquire();            //bus holds the mutex till the riders get boarded
-                int riders_to_board = Math.min(riders_waiting, 50);
+                mutex.acquire();                            //bus holds the mutex till the riders get boarded
+                System.out.println("Bus " + myId + " arrived at the bus stop");
+                try {
+                    riders_to_board = Math.min(riders_waiting, 50);
+                    System.out.println("Bus " + myId + " sees " + riders_waiting + " riders waiting");
 
-                for (int i = 0; i < riders_to_board; i++) {
-                    bus.release();
-                    boarded.acquire();      //wait till each rider is baorded
+                    for (int i = 0; i < riders_to_board; i++) {
+                        bus.release();
+                        boarded.acquire();                  //wait till each rider is baorded
+                    }
+                    riders_waiting = Math.max(riders_waiting - 50, 0);
+                } finally {
+                    mutex.release();                        //release the mutex in case of any exception
                 }
-
-                riders_waiting = Math.max(riders_waiting - 50, 0);
-                mutex.release();
-                System.out.println("Bus "+ myId + " departed");
-
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                Logger.getLogger(SenateBusProblem.class.getName()).log(Level.SEVERE, null, "Bus " + myId + " thread got interrupted");
             }
+            System.out.println("Bus " + myId + " departed with " + riders_to_board + " passengers");
         }
     }
 
@@ -58,15 +59,18 @@ public class SenateBusProblem {
         public void run() {
             try {
                 mutex.acquire();
-                riders_waiting++;
-                mutex.release();
+                try {
+                    riders_waiting++;
+                } finally {
+                    mutex.release();                        //release the mutex in case of any exception
+                }
 
                 bus.acquire();
                 System.out.println("Rider "+ myId +" got boarded");
                 boarded.release();
 
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                Logger.getLogger(SenateBusProblem.class.getName()).log(Level.SEVERE, null, "Rider " + myId + " thread got interrupted");
             }
 
         }
@@ -101,7 +105,7 @@ public class SenateBusProblem {
         public void run(){
             while(true){
                 try {
-                    double currRand = ThreadLocalRandom.current().nextDouble(0, 5);;
+                    double currRand = ThreadLocalRandom.current().nextDouble(0, 5);
                     int rand_time = (int)(mean_time*lambda * Math.exp(currRand * -1 * lambda));
                     Thread.sleep(rand_time);
                     bus_id++;
