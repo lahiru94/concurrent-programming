@@ -28,18 +28,20 @@ public class SenateBusProblem {
             try {
                 mutex.acquire();                    //bus holds the mutex till the riders get boarded
                 System.out.println("Bus " + myId + " arrived at the bus stop");
-                riders_to_board = Math.min(riders_waiting, 50);
-                System.out.println("Bus " + myId + " sees " + riders_waiting + " riders waiting");
+                try {
+                    riders_to_board = Math.min(riders_waiting, 50);
+                    System.out.println("Bus " + myId + " sees " + riders_waiting + " riders waiting");
 
-                for (int i = 0; i < riders_to_board; i++) {
-                    bus.release();
-                    boarded.acquire();              //wait till each rider is baorded
+                    for (int i = 0; i < riders_to_board; i++) {
+                        bus.release();
+                        boarded.acquire();              //wait till each rider is baorded
+                    }
+                    riders_waiting = Math.max(riders_waiting - 50, 0);
+                } finally {
+                    mutex.release(); //release the mutex in case of any exception
                 }
-                riders_waiting = Math.max(riders_waiting - 50, 0);
             } catch (InterruptedException e) {
                 Logger.getLogger(SenateBusProblem.class.getName()).log(Level.SEVERE, null, "Bus " + myId + " thread got interrupted");
-            } finally {
-                mutex.release();                    //release the mutex in case of any exception
             }
             System.out.println("Bus " + myId + " departed with " + riders_to_board + " passengers");
         }
