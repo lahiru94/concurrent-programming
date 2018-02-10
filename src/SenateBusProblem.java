@@ -1,9 +1,6 @@
 import java.util.concurrent.Semaphore;
-import java.util.logging.Logger;
 
 public class SenateBusProblem {
-    private final static Logger LOGGER = Logger.getLogger(SenateBusProblem.class.getName());
-
     int riders_waiting = 0;                 //count of riders in the boarding area
     Semaphore mutex = new Semaphore(1);     //to protect waiting riders
     Semaphore bus = new Semaphore(0);       //to signal arrival of a bus
@@ -29,10 +26,10 @@ public class SenateBusProblem {
 
                 riders_waiting = Math.max(riders_waiting - 50, 0);
                 mutex.release();
-                LOGGER.info("Bus departed");
+                System.out.println("I departed");
 
             } catch (InterruptedException e) {
-                LOGGER.warning("Thread got interrupted");
+                e.printStackTrace();
             }
         }
     }
@@ -47,15 +44,14 @@ public class SenateBusProblem {
                 mutex.release();
 
                 bus.acquire();
-                LOGGER.info("I boarded");
+                System.out.println("I got boarded");
                 boarded.release();
 
             } catch (InterruptedException e) {
-                LOGGER.warning("Thread got interrupted");
+                e.printStackTrace();
             }
 
         }
-
     }
 
 }
