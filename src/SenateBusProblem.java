@@ -70,7 +70,7 @@ public class SenateBusProblem {
                     rider_id++;
                     Rider new_rider = new Rider();
                     new Thread(new_rider).start();
-                    double currRand = ThreadLocalRandom.current().nextDouble(0, 10);
+                    double currRand = ThreadLocalRandom.current().nextDouble(0, 5);
                     int rand_time = (int)(mean_time * lambda * Math.exp(currRand * -1 * lambda));
                     Thread.sleep(rand_time);
                 } catch (InterruptedException ex) {
@@ -89,7 +89,7 @@ public class SenateBusProblem {
         public void run(){
             while(true){
                 try {
-                    double currRand = ThreadLocalRandom.current().nextDouble(0, 10);;
+                    double currRand = ThreadLocalRandom.current().nextDouble(0, 5);;
                     int rand_time = (int)(mean_time*lambda * Math.exp(currRand * -1 * lambda));
                     System.out.println(rand_time);
                     Thread.sleep(rand_time);
@@ -108,7 +108,6 @@ public class SenateBusProblem {
         SenateBusProblem simulation = new SenateBusProblem();
         new Thread(simulation.new BusCreator()).start();
         new Thread(simulation.new RideCreator()).start();
-
     }
 
 
