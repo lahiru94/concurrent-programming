@@ -1,14 +1,18 @@
 import java.util.concurrent.Semaphore;
+import java.util.Random;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.concurrent.ThreadLocalRandom;
+
 
 public class SenateBusProblem {
+    int simulation_speed = 100;               //increase this to fast forward the simulation.1 is normal speed.
     int riders_waiting = 0;                 //count of riders in the boarding area
     Semaphore mutex = new Semaphore(1);     //to protect waiting riders
     Semaphore bus = new Semaphore(0);       //to signal arrival of a bus
     Semaphore boarded = new Semaphore(0);   // to signal a rider has been boarded
 
-    public static void main(String args[]) {
-        SenateBusProblem senateBusProblem = new SenateBusProblem();
-    }
+    
 
     class Bus implements Runnable {
 
@@ -53,5 +57,60 @@ public class SenateBusProblem {
 
         }
     }
+
+    class RideCreator implements Runnable{
+        int rider_id=0;
+        int mean_time=(30000/simulation_speed)*2;
+        double lambda = 2;
+        Random rand = new Random();
+        @Override
+        public void run(){
+            while(true){
+                try {
+                    rider_id++;
+                    Rider new_rider = new Rider();
+                    new Thread(new_rider).start();
+                    double currRand = ThreadLocalRandom.current().nextDouble(0, 10);
+                    int rand_time = (int)(mean_time * lambda * Math.exp(currRand * -1 * lambda));
+                    Thread.sleep(rand_time);
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(SenateBusProblem.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }
+    }
+
+    class BusCreator implements Runnable{
+        int bus_id=0;
+        int mean_time=(1200000/simulation_speed)*2;
+        double lambda = 2;
+        Random rand = new Random();
+        @Override
+        public void run(){
+            while(true){
+                try {
+                    double currRand = ThreadLocalRandom.current().nextDouble(0, 10);;
+                    int rand_time = (int)(mean_time*lambda * Math.exp(currRand * -1 * lambda));
+                    System.out.println(rand_time);
+                    Thread.sleep(rand_time);
+                    bus_id++;
+                    Bus new_bus = new Bus();
+                    new Thread(new_bus).start();
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(SenateBusProblem.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }
+    }
+
+
+    public static void main(String[] args) {
+        SenateBusProblem simulation = new SenateBusProblem();
+        new Thread(simulation.new BusCreator()).start();
+        new Thread(simulation.new RideCreator()).start();
+
+    }
+
+
 
 }
