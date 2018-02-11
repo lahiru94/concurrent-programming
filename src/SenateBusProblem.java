@@ -38,7 +38,7 @@ public class SenateBusProblem {
                     }
                     ridersWaiting = Math.max(ridersWaiting - 50, 0);
                 } finally {
-                    mutex.release();                        //release the mutex in case of any exception
+                    mutex.release();                        //release the mutex 
                 }
             } catch (InterruptedException e) {
                 Logger.getLogger(SenateBusProblem.class.getName()).log(Level.SEVERE, null, "Bus " + myId + " thread got interrupted");
@@ -62,7 +62,7 @@ public class SenateBusProblem {
                 try {
                     ridersWaiting++;
                 } finally {
-                    mutex.release();                        //release the mutex in case of any exception
+                    mutex.release();                        //release the mutex
                 }
 
                 bus.acquire();
