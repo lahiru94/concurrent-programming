@@ -79,7 +79,7 @@ public class SenateBusProblem {
     class RideCreator implements Runnable{
 
         int riderId=0;
-        int meanTime=(30000/simulationSpeed);
+        int meanTime=(30000/simulationSpeed); //mean time of random distribution = 30sec
 
         @Override
         public void run(){
@@ -88,8 +88,9 @@ public class SenateBusProblem {
                     riderId++;
                     Rider newRider = new Rider(riderId);
                     new Thread(newRider).start();
+                    System.out.println("Rider "+ riderId +" arrived at the bus stop");
                     int randTime = SenateBusProblem.getRandomNumber(meanTime);
-                    Thread.sleep(randTime);
+                    Thread.sleep(randTime);//sleep for random time interval
                 } catch (InterruptedException ex) {
                     Logger.getLogger(SenateBusProblem.class.getName()).log(Level.SEVERE, null, ex);
                 }
@@ -100,7 +101,7 @@ public class SenateBusProblem {
     class BusCreator implements Runnable{
 
         int busId=0;
-        int meanTime=(1200000/simulationSpeed);
+        int meanTime=(1200000/simulationSpeed); //mean time of random distribution = 20min
 
         @Override
         public void run(){
@@ -108,7 +109,7 @@ public class SenateBusProblem {
                 try {
                     int randTime = SenateBusProblem.getRandomNumber(meanTime);
                     System.out.println(randTime);
-                    Thread.sleep(randTime);
+                    Thread.sleep(randTime);//sleep for random time interval
                     busId++;
                     Bus newBus = new Bus(busId);
                     new Thread(newBus).start();
@@ -136,7 +137,9 @@ public class SenateBusProblem {
 
     public static void main(String[] args) {
         SenateBusProblem simulation = new SenateBusProblem();
+        //this thread will spawn Bus threads at random intervals
         new Thread(simulation.new BusCreator()).start();
+        //this thread will spawn Rider threads at random intervals
         new Thread(simulation.new RideCreator()).start();
     }
 
