@@ -108,7 +108,6 @@ public class SenateBusProblem {
             while(true){
                 try {
                     int randTime = SenateBusProblem.getRandomNumber(meanTime);
-                    System.out.println(randTime);
                     Thread.sleep(randTime);//sleep for random time interval
                     busId++;
                     Bus newBus = new Bus(busId);
