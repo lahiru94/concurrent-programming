@@ -2,6 +2,9 @@
 #include <time.h>
 #include <cstdlib> 
 #include <chrono>
+#include<vector>
+#include<cmath>
+#include<numeric>
 using namespace std;
 
 
@@ -30,11 +33,33 @@ double** generateMatrix(int n){
 
 }
 
-void MultiplySerial() {
+double getStandardDiviation(vector<double> *vals, double mean){
+    double stdev;
+
+    stdev = 0.0;
+    for(int i=0;i<vals->size();i++){
+        stdev += pow((*vals)[i]-mean, 2);
+    }
+
+    stdev = sqrt(stdev/(vals->size()-1));
+
+    return stdev;
+}
+
+double calculateSampleCount(int pilot, vector<double> *vals){
+    double z = 1.96;
+    int r = 5;
+
+    double x_bar = accumulate(vals->begin(), vals->end(), 0.0) / vals->size();
+    double s = getStandardDiviation(vals, x_bar);
+
+    return max(pilot, (int) pow( (100*z*s)/(5*x_bar), 2));
+}
+
+
+
+double MultiplySerial(int n) {
   
-    cout << "Enter arry size" << endl;
-    int n;
-    cin >> n;
 
     double **first = generateMatrix(n);
     
@@ -61,16 +86,13 @@ void MultiplySerial() {
 
     auto end = chrono::high_resolution_clock::now(); 
     chrono::duration<double> elapsed = end - start;
-    cout << "Elapsed time: " << elapsed.count() << ".\n";
+    return elapsed.count();
  
 }
 
 
-void MultiplyParallel() {
+double MultiplyParallel(int n) {
   
-    cout << "Enter arry size" << endl;
-    int n;
-    cin >> n;
 
     double **first = generateMatrix(n);
     
@@ -84,7 +106,6 @@ void MultiplyParallel() {
     double **second = generateMatrix(n);
 
     
-    // cout << "final result: \n";
 
     auto start = chrono::high_resolution_clock::now();
 
@@ -99,22 +120,32 @@ void MultiplyParallel() {
 
     auto end = chrono::high_resolution_clock::now(); 
     chrono::duration<double> elapsed = end - start;
-    cout << "Elapsed time: " << elapsed.count() << ".\n"; 
+    return elapsed.count(); 
 }
 
 
 
-void MultiplyParallelOptimized() {
+double MultiplyParallelOptimized(int n) {
 
-    
-    cout << "Enter arry size" << endl;
-    int n;
-    cin >> n;
+    double a = 0;//lower limit
+    double b = 20;//upper limit
 
     double *first = new double[n*n];
     double *second = new double[n*n];
     double *product = new double[n*n];
 
+    //populating arrays with random double values
+    for(int i = 0; i < n; ++i){
+        for(int j = 0; j < n; ++j){
+            first[i*n+j] = ((double)rand() / RAND_MAX) * (b - a) + a;
+        }
+    }
+
+    for(int i = 0; i < n; ++i){
+        for(int j = 0; j < n; ++j){
+            second[i*n+j] = ((double)rand() / RAND_MAX) * (b - a) + a;
+        }
+    }
 
     auto start = chrono::high_resolution_clock::now();
     
@@ -124,20 +155,39 @@ void MultiplyParallelOptimized() {
             // Multiply the row of A by the column of B to get the row, column of product.  
             for (int inner = 0; inner < n; inner++) {  
                 product[row*n+col] += first[row*n+inner] * second[inner*n+col];  
-            }  
-            // std::cout << product[row*n+col] << "  ";  
-        }  
-        // std::cout << "\n";  
+            }   
+        }   
     }
 
     auto end = chrono::high_resolution_clock::now(); 
-    chrono::duration<double> elapsed = end - start;
-    cout << "Elapsed time: " << elapsed.count() << ".\n";    
+    chrono::duration<double> elapsed = end - start;    
+    return elapsed.count();
 }  
+
+void runBenchmarking(int type,int iterations,int size){
+    srand (time(NULL));
+    vector<double> values;
+    double elapsed;
+    for(int i=0;i<iterations;i++){
+        if(type==1){
+            elapsed = MultiplySerial(size);
+        }else if (type==2){
+            elapsed = MultiplyParallel(size);
+        }else {
+            elapsed = MultiplyParallelOptimized(size);
+        }
+        values.push_back(elapsed);
+    }   
+    int required = calculateSampleCount(iterations, &values);  
+    if(required>iterations){
+        runBenchmarking(type,required,size);
+    }else{
+        cout << "runs: " << iterations << " required runs: "<< required << " mean: " << accumulate(values.begin(), values.end(), 0.0) / iterations << endl;;
+    }
+}
 
 int main() { 
 
-    srandom(time(NULL));
     int type;
 
     cout << "Select simulation type: \n";
@@ -147,15 +197,11 @@ int main() {
 
     cin >> type;
 
-    if(type==1){
-        MultiplySerial();
-    }else if (type==2){
-        MultiplyParallel();
-    }else if (type==3){
-        MultiplyParallelOptimized();
-    }else{
-        cout << "invalid input!";
-    }
+    cout << "Enter arry size" << endl;
+    int n;
+    cin >> n;
+
+    runBenchmarking(type,10,n);
     
     return 0;  
 }
