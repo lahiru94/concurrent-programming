@@ -1,11 +1,26 @@
 #include <stdio.h>
 #include <time.h>
 #include <stdlib.h>
- 
+#include "timer.h"
+
+
+double** Make2DDoubleArray(int arraySizeX, int arraySizeY) {
+  double** theArray;
+  theArray = (double**) malloc(arraySizeX*sizeof(double*));
+  for (int i = 0; i < arraySizeX; i++)
+    theArray[i] = (double*) malloc(arraySizeY*sizeof(double));
+    return theArray;
+} 
+
 int main()
 {
   int  n, c, d, k; 
   double sum = 0;
+
+  //timing variables
+  double start;
+  double finish;
+
   srand(time(NULL));   // should only be called once
 
  
@@ -14,7 +29,7 @@ int main()
   
  
   //generating first matrix
-  double first[n][n];
+  double** first = Make2DDoubleArray(n,n);
   for (c = 0; c < n; c++){
     for (d = 0; d < n; d++){
       double curr_val = rand();
@@ -22,7 +37,7 @@ int main()
     } 
   }
   //generating second matrix
-  double second[n][n];
+  double** second = Make2DDoubleArray(n,n);
   for (c = 0; c < n; c++){
     for (d = 0; d < n; d++){
       second[c][d] = rand();
@@ -30,6 +45,8 @@ int main()
   }
 
   double multiply[n][n];//resulting matrix
+
+  GET_TIME(start);//execution starts here
   for (c = 0; c < n; c++) {
     for (d = 0; d < n; d++) {
       for (k = 0; k < n; k++) {
@@ -40,15 +57,19 @@ int main()
       sum = 0;
     }
   }
+  GET_TIME(finish);//execution ends here
 
-  printf("Product of the matrices:\n");
+  //caculating elapsed time
+  double time_taken = finish-start;
 
-  for (c = 0; c < n; c++) {
-    for (d = 0; d < n; d++)
-      printf("%f\t", multiply[c][d]);
+  printf("Time taken: %f seconds\n",time_taken);
 
-    printf("\n");
-  }
+  // for (c = 0; c < n; c++) {
+  //   for (d = 0; d < n; d++)
+  //     printf("%f\t", multiply[c][d]);
+
+  //   printf("\n");
+  // }
   
  
   return 0;
