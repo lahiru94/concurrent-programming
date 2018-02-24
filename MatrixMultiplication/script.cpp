@@ -182,7 +182,7 @@ void runBenchmarking(int type,int iterations,int size){
     if(required>iterations){
         runBenchmarking(type,required,size);
     }else{
-        cout << "runs: " << iterations << " required runs: "<< required << " mean: " << accumulate(values.begin(), values.end(), 0.0) / iterations << endl;;
+        cout<<"array size: "<< size << " runs: " << iterations << " required runs: "<< required << " mean: " << accumulate(values.begin(), values.end(), 0.0) / iterations << endl;;
     }
 }
 
@@ -195,13 +195,9 @@ int main() {
     cout << "   2 - Parallel multiplication.\n";
     cout << "   3 - Optimized parallel multiplication.\n";
 
-    cin >> type;
-
-    cout << "Enter arry size" << endl;
-    int n;
-    cin >> n;
-
-    runBenchmarking(type,10,n);
+    for(int i=200;i<2001;i+=200){
+        runBenchmarking(type,10,i);
+    }
     
     return 0;  
 }
